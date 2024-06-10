@@ -1,0 +1,58 @@
+#include <SPI.h>
+#include <LoRa.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);//Mention the pin number for LCD connection int a=A0; int Output;
+float temp;
+String loRaMessage;
+String temperature;
+String humidity;
+String cel;
+//String readingID; //Initialize LCD method
+void setup() {
+  Serial.begin(57600);
+  lcd.init();
+  lcd.begin(16, 2);
+  lcd.backlight();
+  //pinMode(a,OUTPUT);
+  while (!Serial);
+  Serial.println("LoRa Receiver");
+  if (!LoRa.begin(8E6))
+  {
+    Serial.println("Starting LoRa failed!");
+    while (1);
+    }
+    }
+void loop() {
+  // try to parse packet
+  String LoRaData;
+  int packetSize = LoRa.parsePacket();
+  if (packetSize)
+  {
+    while (LoRa.available())
+    {
+      String LoRaData = LoRa.readString();
+      Serial.print(LoRaData);
+      // String example: 1/27.43&654#95.34 //Serial.print(LoRaData);
+      const int pos1 = LoRaData.indexOf('/');
+      const int pos2 = LoRaData.indexOf('&');
+      const int pos3 = LoRaData.indexOf('#');
+      String Signal2= LoRaData.substring(0, pos1);
+      String temp = LoRaData.substring(pos1+1, pos2);
+      String i = LoRaData.substring(pos2+1, pos3);
+      lcd.setCursor(0,0);
+      lcd.print("HR = ");
+      lcd.print(Signal2);
+   
+      lcd.print(" bpm");
+      lcd.setCursor(0,1);
+      lcd.print("T=");
+      lcd.print(temp);
+      lcd.print("^C");
+      int Output = i.toInt();
+      //Serial.print(a);
+      lcd.setCursor(9,1);
+      lcd.print(" W=");
+      lcd.print(i);
+      }
+  }
+}
